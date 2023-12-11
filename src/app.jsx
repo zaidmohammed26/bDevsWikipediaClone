@@ -1,8 +1,7 @@
-import React from "react"
-import "./App.css"
-import Body from "./components/body/body"
-import Footer from "./components/footer/footer"
-
+import React from "react";
+import "./App.css";
+import Body from "./components/body/body";
+import Footer from "./components/footer/footer";
 
 function App() {
     return (
@@ -13,4 +12,4 @@ function App() {
     )
 }
 
-export default App
+export default App;
