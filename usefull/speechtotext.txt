@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./navbar.css";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
@@ -6,38 +6,37 @@ import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import microPhone from "./microphone.png";
-import InputGroup from 'react-bootstrap/InputGroup';
+import InputGroup from "react-bootstrap/InputGroup";
 
 function NavbarComponent(props) {
   const [input, setInput] = useState("");
-  let recognition = null;
+  const recognition = useRef(null);
 
   const handleSpeechRecognition = () => {
-    recognition = new window.webkitSpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
+    if (!recognition.current) {
+      recognition.current = new window.webkitSpeechRecognition();
+      recognition.current.continuous = false;
+      recognition.current.interimResults = false;
+      recognition.current.lang = "en-US";
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
-    };
+      recognition.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        props.toHandleSearch(transcript);
+      };
 
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
-    };
+      recognition.current.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+      };
+    }
 
-    recognition.start();
+    recognition.current.start();
   };
 
   const stopSpeechRecognition = () => {
-    if (recognition) {
-      recognition.stop();
+    if (recognition.current) {
+      recognition.current.stop();
     }
-  };
-
-  const handleChange = (event) => {
-    setInput(event.target.value);
   };
 
   const handleSearch = () => {
@@ -73,9 +72,11 @@ function NavbarComponent(props) {
               navbarScroll
             ></Nav>
             <Form className="d-flex">
-              <InputGroup.Text id="basic-addon1" style={{cursor:"pointer"}} onClick={handleSpeechRecognition}>
-                tap to speak
-                <img style={{ width: "20px" ,marginLeft:'5px'}} src={microPhone} alt="" />
+              <InputGroup.Text
+                id="basic-addon1"
+                onClick={handleSpeechRecognition}
+              >
+                <img style={{ width: "20px" }} src={microPhone} alt="" />
               </InputGroup.Text>
               <Form.Control
                 type="input"
@@ -83,7 +84,7 @@ function NavbarComponent(props) {
                 className="me-2"
                 aria-label="Search"
                 value={input}
-                onChange={handleChange}
+                onChange={(e) => setInput(e.target.value)}
               />
               <Button variant="outline-success" onClick={handleSearch}>
                 Search
